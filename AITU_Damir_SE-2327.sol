@@ -1,52 +1,47 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
-contract UniversityToken is ERC20 {
-    constructor() ERC20("UniversityName_GroupName", "UNGN") {
+contract AITU_DAMIR_SE2327 is ERC20, ERC20Permit {
+    // Event to log transaction information
+    event TransactionDetails(
+        address indexed sender,
+        address indexed receiver,
+        uint256 amount,
+        uint256 timestamp
+    );
+
+    // Constructor to initialize token and mint initial supply
+    constructor() ERC20("AITU_DAMIR_SE2327", "MTK") ERC20Permit("AITU_DAMIR_SE2327") payable {
         _mint(msg.sender, 2000 * 10 ** decimals());
     }
 
-    // Функция для получения времени последней транзакции
-    function getLastTransactionTime() public view returns (string memory) {
-        return timestampToString(block.timestamp);
+    // Function to return the block timestamp
+    function getBlockTimestamp() public view returns (uint256) {
+        return block.timestamp;
     }
 
-    // Функция для получения адреса отправителя транзакции
-    function getTransactionSender() public view returns (address) {
-        return msg.sender;
-    }
+    // Function to transfer tokens with additional transaction details
+    function transferWithDetails(address recipient, uint256 amount) public returns (bool) {
+        // Perform the transfer
+        bool success = transfer(recipient, amount);
 
-    // Функция для получения адреса получателя транзакции
-    function getTransactionReceiver(address receiver) public pure returns (address) {
-        return receiver;
-    }
-
-    // Вспомогательная функция для преобразования timestamp в строку
-    function timestampToString(uint256 timestamp) internal pure returns (string memory) {
-        return string(abi.encodePacked("Timestamp: ", uint2str(timestamp)));
-    }
-
-    // Вспомогательная функция для преобразования uint в строку
-    function uint2str(uint256 _i) internal pure returns (string memory) {
-        if (_i == 0) {
-            return "0";
+        // Log transaction details if the transfer is successful
+        if (success) {
+            emit TransactionDetails(msg.sender, recipient, amount, block.timestamp);
         }
-        uint256 j = _i;
-        uint256 length;
-        while (j != 0) {
-            length++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(length);
-        uint256 k = length;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
-            bstr[k] = bytes1(temp);
-            _i /= 10;
-        }
-        return string(bstr);
+        return success;
+    }
+
+    // Function to retrieve sender and receiver addresses
+    function getSenderAndReceiver(address recipient) 
+        public 
+        view 
+        returns (address sender, address receiver) 
+    {
+        sender = msg.sender;  // Address calling the function
+        receiver = recipient; // Address passed as the recipient
     }
 }
